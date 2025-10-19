@@ -9,6 +9,12 @@ namespace XyzSupplierPlugin\Frontend;
  */
 class PriceModifier {
     const META_KEY = 'xyz_supplier_discount_percent';
+    
+    /**
+     * Track processed products to prevent multiple discount applications
+     * @var array
+     */
+    private static $processed_products = [];
 
     public function __construct() {
         $this->init_hooks();
@@ -23,9 +29,12 @@ class PriceModifier {
             return;
         }
 
-        // Use only price HTML modification to avoid multiple calculations
+        // Only modify the main price filters - this affects cart, checkout, emails, etc.
+        add_filter('woocommerce_product_get_price', [$this, 'modify_product_price'], 10, 2);
+        add_filter('woocommerce_product_variation_get_price', [$this, 'modify_product_price'], 10, 2);
+        
+        // Price display hook for HTML formatting
         add_filter('woocommerce_get_price_html', [$this, 'modify_price_html'], 20, 2);
-        add_filter('woocommerce_variation_prices', [$this, 'modify_variation_prices'], 20, 3);
     }
 
     /**
@@ -35,6 +44,43 @@ class PriceModifier {
      */
     private function is_supplier_user() {
         return current_user_can('supplier') && !is_admin();
+    }
+
+    /**
+     * Modify product price - this is the main price filter that affects everything
+     *
+     * @param float      $price   Product price
+     * @param WC_Product $product Product object
+     * @return float
+     */
+    public function modify_product_price($price, $product) {
+        if (!$price || !$product) {
+            return $price;
+        }
+
+        $product_id = $product->get_id();
+        
+        if (isset(self::$processed_products[$product_id])) {
+            return self::$processed_products[$product_id];
+        }
+
+        $discount_percent = $this->get_discount_percent($product);
+        if (!$discount_percent) {
+            self::$processed_products[$product_id] = $price;
+            return $price;
+        }
+
+        $apply_on_sale = get_option('xyzsp_apply_on_sale', 'no');
+        $base_price = ($apply_on_sale === 'yes' && $product->get_sale_price()) 
+                      ? $product->get_sale_price() 
+                      : $product->get_regular_price();
+        
+        $discounted_price = $this->calculate_discounted_price($base_price, $discount_percent, $product);
+        
+        // Store the result to prevent multiple processing
+        self::$processed_products[$product_id] = $discounted_price;
+        
+        return $discounted_price;
     }
 
     /**
@@ -54,49 +100,15 @@ class PriceModifier {
             return $price_html;
         }
 
-        $base_price = $this->get_original_price($product);
+        $apply_on_sale = get_option('xyzsp_apply_on_sale', 'no');
+        $base_price = ($apply_on_sale === 'yes' && $product->get_sale_price()) 
+                      ? $product->get_sale_price() 
+                      : $product->get_regular_price();
+        
         $discounted_price = $this->calculate_discounted_price($base_price, $discount_percent, $product);
 
         // Format the price HTML
         return $this->format_price_html($base_price, $discounted_price, $product);
-    }
-
-    /**
-     * Modify variation prices array
-     *
-     * @param array      $prices    Prices array
-     * @param WC_Product $product   Product object
-     * @param bool       $for_display For display flag
-     * @return array
-     */
-    public function modify_variation_prices($prices, $product, $for_display) {
-        if (!$for_display || !$product) {
-            return $prices;
-        }
-
-        $variation_ids = array_keys($prices['price']);
-        $modified_prices = $prices;
-
-        foreach ($variation_ids as $variation_id) {
-            $variation = wc_get_product($variation_id);
-            if (!$variation) {
-                continue;
-            }
-
-            $discount_percent = $this->get_discount_percent($variation);
-            if (!$discount_percent) {
-                continue;
-            }
-
-            $original_price = $variation->get_regular_price();
-            $discounted_price = $this->calculate_discounted_price($original_price, $discount_percent, $variation);
-
-            if ($discounted_price < $original_price) {
-                $modified_prices['price'][$variation_id] = $discounted_price;
-            }
-        }
-
-        return $modified_prices;
     }
 
     /**
@@ -135,20 +147,6 @@ class PriceModifier {
 
         // Ensure price is not negative
         return max(0, $discounted_price);
-    }
-
-    /**
-     * Get original price for display
-     *
-     * @param WC_Product $product Product object
-     * @return float
-     */
-    private function get_original_price($product) {
-        if ($product->get_sale_price()) {
-            return $product->get_sale_price();
-        }
-
-        return $product->get_regular_price();
     }
 
     /**
