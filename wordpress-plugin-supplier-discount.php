@@ -1,7 +1,7 @@
 <?php
 /**
  * Plugin Name: Supplier Discount for WooCommerce
- * Plugin URI: https://github.com/xyz/supplier-discount-plugin
+ * Plugin URI: https://github.com/alireza10up/wordpress-plugin-supplier-discount
  * Description: Adds supplier discount percentage field to WooCommerce products and applies discount for supplier role users.
  * Version: 1.0.0
  * Author: Alireza Vahdani
