@@ -23,15 +23,9 @@ class PriceModifier {
             return;
         }
 
-        // Price modification hooks
-        add_filter('woocommerce_product_get_price', [$this, 'modify_product_price'], 10, 2);
-        add_filter('woocommerce_product_get_sale_price', [$this, 'modify_sale_price'], 10, 2);
-        add_filter('woocommerce_product_variation_get_price', [$this, 'modify_variation_price'], 10, 2);
-        add_filter('woocommerce_product_variation_get_sale_price', [$this, 'modify_variation_sale_price'], 10, 2);
-
-        // Price display hooks
-        add_filter('woocommerce_get_price_html', [$this, 'modify_price_html'], 10, 2);
-        add_filter('woocommerce_variation_prices', [$this, 'modify_variation_prices'], 10, 3);
+        // Use only price HTML modification to avoid multiple calculations
+        add_filter('woocommerce_get_price_html', [$this, 'modify_price_html'], 20, 2);
+        add_filter('woocommerce_variation_prices', [$this, 'modify_variation_prices'], 20, 3);
     }
 
     /**
@@ -41,98 +35,6 @@ class PriceModifier {
      */
     private function is_supplier_user() {
         return current_user_can('supplier') && !is_admin();
-    }
-
-    /**
-     * Modify product price
-     *
-     * @param float      $price   Product price
-     * @param WC_Product $product Product object
-     * @return float
-     */
-    public function modify_product_price($price, $product) {
-        if (!$price || !$product) {
-            return $price;
-        }
-
-        $discount_percent = $this->get_discount_percent($product);
-        if (!$discount_percent) {
-            return $price;
-        }
-
-        return $this->calculate_discounted_price($price, $discount_percent, $product);
-    }
-
-    /**
-     * Modify sale price
-     *
-     * @param float      $price   Sale price
-     * @param WC_Product $product Product object
-     * @return float
-     */
-    public function modify_sale_price($price, $product) {
-        if (!$price || !$product) {
-            return $price;
-        }
-
-        $discount_percent = $this->get_discount_percent($product);
-        if (!$discount_percent) {
-            return $price;
-        }
-
-        // Check if we should apply discount on sale prices
-        $apply_on_sale = get_option('xyzsp_apply_on_sale', 'no');
-        if ($apply_on_sale !== 'yes') {
-            return $price;
-        }
-
-        return $this->calculate_discounted_price($price, $discount_percent, $product);
-    }
-
-    /**
-     * Modify variation price
-     *
-     * @param float      $price   Variation price
-     * @param WC_Product $product Variation object
-     * @return float
-     */
-    public function modify_variation_price($price, $product) {
-        if (!$price || !$product) {
-            return $price;
-        }
-
-        $discount_percent = $this->get_discount_percent($product);
-        if (!$discount_percent) {
-            return $price;
-        }
-
-        return $this->calculate_discounted_price($price, $discount_percent, $product);
-    }
-
-    /**
-     * Modify variation sale price
-     *
-     * @param float      $price   Variation sale price
-     * @param WC_Product $product Variation object
-     * @return float
-     */
-    public function modify_variation_sale_price($price, $product) {
-        if (!$price || !$product) {
-            return $price;
-        }
-
-        $discount_percent = $this->get_discount_percent($product);
-        if (!$discount_percent) {
-            return $price;
-        }
-
-        // Check if we should apply discount on sale prices
-        $apply_on_sale = get_option('xyzsp_apply_on_sale', 'no');
-        if ($apply_on_sale !== 'yes') {
-            return $price;
-        }
-
-        return $this->calculate_discounted_price($price, $discount_percent, $product);
     }
 
     /**
@@ -152,14 +54,11 @@ class PriceModifier {
             return $price_html;
         }
 
-        $original_price = $this->get_original_price($product);
-        $discounted_price = $this->calculate_discounted_price($original_price, $discount_percent, $product);
+        $base_price = $this->get_original_price($product);
+        $discounted_price = $this->calculate_discounted_price($base_price, $discount_percent, $product);
 
-        if ($discounted_price >= $original_price) {
-            return $price_html;
-        }
-
-        return $this->format_price_html($original_price, $discounted_price, $product);
+        // Format the price HTML
+        return $this->format_price_html($base_price, $discounted_price, $product);
     }
 
     /**
@@ -245,9 +144,7 @@ class PriceModifier {
      * @return float
      */
     private function get_original_price($product) {
-        $apply_on_sale = get_option('xyzsp_apply_on_sale', 'no');
-        
-        if ($apply_on_sale === 'yes' && $product->get_sale_price()) {
+        if ($product->get_sale_price()) {
             return $product->get_sale_price();
         }
 
