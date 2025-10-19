@@ -1,0 +1,26 @@
+{
+    "name": "xyz/supplier-discount-plugin",
+    "description": "WordPress plugin for WooCommerce supplier discount functionality",
+    "type": "wordpress-plugin",
+    "license": "GPL-2.0-or-later",
+    "authors": [
+        {
+            "name": "Alireza Vahdani",
+            "email": "toolsalireza10up@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=7.4"
+    },
+    "autoload": {
+        "psr-4": {
+            "XyzSupplierPlugin\\": "src/"
+        }
+    },
+    "config": {
+        "optimize-autoloader": true,
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
