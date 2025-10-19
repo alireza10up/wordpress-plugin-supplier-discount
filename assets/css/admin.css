@@ -1,0 +1,63 @@
+/**
+ * Admin styles for Supplier Discount Plugin
+ */
+
+.xyz-supplier-discount-field {
+    margin-bottom: 15px;
+}
+
+.xyz-supplier-discount-field label {
+    font-weight: 600;
+    color: #23282d;
+}
+
+.xyz-supplier-discount-field input[type="number"] {
+    width: 100px;
+    margin-left: 10px;
+}
+
+.xyz-supplier-discount-field .description {
+    font-style: italic;
+    color: #666;
+    margin-top: 5px;
+}
+
+.xyz-supplier-discount-error {
+    color: #d63638;
+    font-size: 12px;
+    margin-top: 5px;
+    display: none;
+}
+
+.xyz-supplier-discount-error.show {
+    display: block;
+}
+
+/* Variation field styling */
+.variation-field .xyz-supplier-discount-field {
+    margin-top: 10px;
+    padding: 10px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Settings page styling */
+.xyz-supplier-settings .form-table th {
+    width: 200px;
+    padding: 20px 10px 20px 0;
+}
+
+.xyz-supplier-settings .form-table td {
+    padding: 15px 10px;
+}
+
+.xyz-supplier-settings .description {
+    font-style: italic;
+    color: #666;
+    margin-top: 5px;
+}
+
+.xyz-supplier-settings .button-primary {
+    margin-top: 10px;
+}
