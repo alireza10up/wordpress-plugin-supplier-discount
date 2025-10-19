@@ -33,7 +33,6 @@ class Activator {
         }
 
         // Add supplier role
-        // TODO can be added to the plugin settings
         add_role(
             'supplier',
             __('Supplier', 'xyz-supplier-discount'),

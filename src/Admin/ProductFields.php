@@ -43,13 +43,13 @@ class ProductFields {
         woocommerce_wp_text_input([
             'id' => self::META_KEY,
             'label' => __('Supplier Discount %', 'xyz-supplier-discount'),
-            'description' => __('Enter discount percentage for supplier role (0-100)', 'xyz-supplier-discount'),
+            'description' => __('Enter discount percentage for supplier role (1-100)', 'xyz-supplier-discount'),
             'desc_tip' => true,
             'type' => 'number',
             'custom_attributes' => [
-                'min' => '0',
+                'min' => '1',
                 'max' => '100',
-                'step' => '0.01',
+                'step' => '1',
             ],
             'value' => $value,
         ]);
@@ -82,17 +82,6 @@ class ProductFields {
             update_post_meta($post_id, self::META_KEY, $discount_percent);
         } else {
             delete_post_meta($post_id, self::META_KEY);
-            // Add admin notice for validation error
-            add_action('admin_notices', function() use ($discount_percent) {
-                if (!empty($discount_percent)) {
-                    echo '<div class="notice notice-error is-dismissible"><p>';
-                    echo sprintf(
-                        __('خطا: درصد تخفیف "%s" نامعتبر است. باید بین 0 تا 100 باشد.', 'xyz-supplier-discount'),
-                        esc_html($discount_percent)
-                    );
-                    echo '</p></div>';
-                }
-            });
         }
     }
 
@@ -112,13 +101,13 @@ class ProductFields {
             'id' => self::META_KEY . '[' . $loop . ']',
             'name' => self::META_KEY . '[' . $loop . ']',
             'label' => __('Supplier Discount %', 'xyz-supplier-discount'),
-            'description' => __('Enter discount percentage for supplier role (0-100)', 'xyz-supplier-discount'),
+            'description' => __('Enter discount percentage for supplier role (1-100)', 'xyz-supplier-discount'),
             'desc_tip' => true,
             'type' => 'number',
             'custom_attributes' => [
-                'min' => '0',
+                'min' => '1',
                 'max' => '100',
-                'step' => '0.01',
+                'step' => '1',
             ],
             'value' => $value,
             'wrapper_class' => 'form-row form-row-full',
@@ -149,17 +138,6 @@ class ProductFields {
             update_post_meta($variation_id, self::META_KEY, $discount_percent);
         } else {
             delete_post_meta($variation_id, self::META_KEY);
-            // Add admin notice for validation error
-            add_action('admin_notices', function() use ($discount_percent) {
-                if (!empty($discount_percent)) {
-                    echo '<div class="notice notice-error is-dismissible"><p>';
-                    echo sprintf(
-                        __('خطا: درصد تخفیف "%s" نامعتبر است. باید بین 0 تا 100 باشد.', 'xyz-supplier-discount'),
-                        esc_html($discount_percent)
-                    );
-                    echo '</p></div>';
-                }
-            });
         }
     }
 
@@ -174,8 +152,13 @@ class ProductFields {
             return true; // Allow empty values
         }
 
-        $value = floatval($value);
-        return $value >= 0 && $value <= 100;
+        // Check if it's a valid integer
+        if (!is_numeric($value) || !is_int((int)$value) || (int)$value != (float)$value) {
+            return false;
+        }
+
+        $value = (int)$value;
+        return $value >= 1 && $value <= 100;
     }
 
     /**

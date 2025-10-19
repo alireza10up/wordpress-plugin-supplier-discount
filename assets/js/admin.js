@@ -5,13 +5,26 @@
     'use strict';
 
     $(document).ready(function() {
-        // Validate discount percentage input for both simple and variable products
-        validateAllDiscountInputs();
+        // Initialize validation
+        initValidation();
         
         // Re-validate when variations are added/updated
         $(document).on('woocommerce_variations_added', function() {
-            validateAllDiscountInputs();
+            setTimeout(initValidation, 100);
         });
+        
+        // Also re-initialize when variations are loaded
+        $(document).on('woocommerce_variations_loaded', function() {
+            setTimeout(initValidation, 100);
+        });
+        
+        // Re-initialize every 2 seconds to catch dynamically added inputs
+        setInterval(function() {
+            var currentCount = $('input[name*="xyz_supplier_discount_percent"]').length;
+            if (currentCount > 0) {
+                initValidation();
+            }
+        }, 2000);
 
         // Validate on form submission
         $('form#post, form#variable_product_options').on('submit', function(e) {
@@ -34,11 +47,24 @@
     /**
      * Initialize validation for all discount inputs
      */
-    function validateAllDiscountInputs() {
-        $('input[name*="xyz_supplier_discount_percent"]').off('blur input').on('blur', function() {
+    function initValidation() {
+        // Remove existing event handlers
+        $('input[name*="xyz_supplier_discount_percent"]').off('blur.xyz input.xyz');
+        
+        // Add new event handlers
+        $('input[name*="xyz_supplier_discount_percent"]').on('blur.xyz', function() {
+            console.log('Blur event triggered for:', $(this).attr('name'));
             validateDiscountInput($(this));
-        }).on('input', function() {
+        }).on('input.xyz', function() {
+            console.log('Input event triggered for:', $(this).attr('name'));
             validateDiscountInput($(this));
+        });
+        
+        console.log('Validation initialized for', $('input[name*="xyz_supplier_discount_percent"]').length, 'inputs');
+        
+        // Debug: log all found inputs
+        $('input[name*="xyz_supplier_discount_percent"]').each(function() {
+            console.log('Found input:', $(this).attr('name'), $(this).attr('id'));
         });
     }
 
@@ -60,17 +86,17 @@
         }
 
         // Convert to number
-        var numValue = parseFloat(value);
+        var numValue = parseInt(value, 10);
 
-        // Check if it's a valid number
-        if (isNaN(numValue)) {
-            showError($input, 'لطفاً یک عدد معتبر وارد کنید.');
+        // Check if it's a valid integer
+        if (isNaN(numValue) || !Number.isInteger(parseFloat(value))) {
+            showError($input, 'لطفاً یک عدد صحیح معتبر وارد کنید.');
             return false;
         }
 
-        // Check range
-        if (numValue < 0 || numValue > 100) {
-            showError($input, 'درصد تخفیف باید بین 0 تا 100 باشد.');
+        // Check range (1 to 100)
+        if (numValue < 1 || numValue > 100) {
+            showError($input, 'درصد تخفیف باید بین 1 تا 100 باشد.');
             return false;
         }
 
