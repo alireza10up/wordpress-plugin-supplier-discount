@@ -27,10 +27,36 @@
     font-size: 12px;
     margin-top: 5px;
     display: none;
+    font-weight: 500;
 }
 
 .xyz-supplier-discount-error.show {
     display: block;
+}
+
+/* Variation field error styling */
+.variation-field .xyz-supplier-discount-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 4px;
+    padding: 8px;
+    margin-top: 8px;
+}
+
+/* Input error state */
+.xyz-supplier-discount-field input[type="number"].error {
+    border-color: #d63638;
+    box-shadow: 0 0 0 1px #d63638;
+}
+
+/* Admin notice styling */
+.notice.xyz-supplier-discount-notice {
+    border-left-color: #d63638;
+}
+
+.notice.xyz-supplier-discount-notice p {
+    margin: 0.5em 0;
+    font-weight: 500;
 }
 
 /* Variation field styling */

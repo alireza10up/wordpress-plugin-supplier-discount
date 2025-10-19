@@ -82,6 +82,17 @@ class ProductFields {
             update_post_meta($post_id, self::META_KEY, $discount_percent);
         } else {
             delete_post_meta($post_id, self::META_KEY);
+            // Add admin notice for validation error
+            add_action('admin_notices', function() use ($discount_percent) {
+                if (!empty($discount_percent)) {
+                    echo '<div class="notice notice-error is-dismissible"><p>';
+                    echo sprintf(
+                        __('خطا: درصد تخفیف "%s" نامعتبر است. باید بین 0 تا 100 باشد.', 'xyz-supplier-discount'),
+                        esc_html($discount_percent)
+                    );
+                    echo '</p></div>';
+                }
+            });
         }
     }
 
@@ -138,6 +149,17 @@ class ProductFields {
             update_post_meta($variation_id, self::META_KEY, $discount_percent);
         } else {
             delete_post_meta($variation_id, self::META_KEY);
+            // Add admin notice for validation error
+            add_action('admin_notices', function() use ($discount_percent) {
+                if (!empty($discount_percent)) {
+                    echo '<div class="notice notice-error is-dismissible"><p>';
+                    echo sprintf(
+                        __('خطا: درصد تخفیف "%s" نامعتبر است. باید بین 0 تا 100 باشد.', 'xyz-supplier-discount'),
+                        esc_html($discount_percent)
+                    );
+                    echo '</p></div>';
+                }
+            });
         }
     }
 

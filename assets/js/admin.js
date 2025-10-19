@@ -5,18 +5,16 @@
     'use strict';
 
     $(document).ready(function() {
-        // Validate discount percentage input
-        $('input[name*="xyz_supplier_discount_percent"]').on('blur', function() {
-            validateDiscountInput($(this));
-        });
-
-        // Real-time validation on input
-        $('input[name*="xyz_supplier_discount_percent"]').on('input', function() {
-            validateDiscountInput($(this));
+        // Validate discount percentage input for both simple and variable products
+        validateAllDiscountInputs();
+        
+        // Re-validate when variations are added/updated
+        $(document).on('woocommerce_variations_added', function() {
+            validateAllDiscountInputs();
         });
 
         // Validate on form submission
-        $('form#post').on('submit', function(e) {
+        $('form#post, form#variable_product_options').on('submit', function(e) {
             var hasError = false;
             
             $('input[name*="xyz_supplier_discount_percent"]').each(function() {
@@ -34,6 +32,17 @@
     });
 
     /**
+     * Initialize validation for all discount inputs
+     */
+    function validateAllDiscountInputs() {
+        $('input[name*="xyz_supplier_discount_percent"]').off('blur input').on('blur', function() {
+            validateDiscountInput($(this));
+        }).on('input', function() {
+            validateDiscountInput($(this));
+        });
+    }
+
+    /**
      * Validate discount percentage input
      *
      * @param {jQuery} $input Input element
@@ -41,10 +50,9 @@
      */
     function validateDiscountInput($input) {
         var value = $input.val();
-        var $error = $input.siblings('.xyz-supplier-discount-error');
         
-        // Remove existing error
-        $error.removeClass('show').text('');
+        // Clear existing error
+        clearError($input);
 
         // Allow empty values
         if (value === '') {
@@ -84,6 +92,17 @@
         }
         
         $error.text(message).addClass('show');
+        $input.addClass('error');
+    }
+
+    /**
+     * Clear error message
+     *
+     * @param {jQuery} $input Input element
+     */
+    function clearError($input) {
+        $input.siblings('.xyz-supplier-discount-error').removeClass('show').text('');
+        $input.removeClass('error');
     }
 
 })(jQuery);
