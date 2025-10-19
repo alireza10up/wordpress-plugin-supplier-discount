@@ -1,0 +1,89 @@
+/**
+ * Admin styles for Supplier Discount Plugin
+ */
+
+.xyz-supplier-discount-field {
+    margin-bottom: 15px;
+}
+
+.xyz-supplier-discount-field label {
+    font-weight: 600;
+    color: #23282d;
+}
+
+.xyz-supplier-discount-field input[type="number"] {
+    width: 100px;
+    margin-left: 10px;
+}
+
+.xyz-supplier-discount-field .description {
+    font-style: italic;
+    color: #666;
+    margin-top: 5px;
+}
+
+.xyz-supplier-discount-error {
+    color: #d63638;
+    font-size: 12px;
+    margin-top: 5px;
+    display: none;
+    font-weight: 500;
+}
+
+.xyz-supplier-discount-error.show {
+    display: block;
+}
+
+/* Variation field error styling */
+.variation-field .xyz-supplier-discount-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 4px;
+    padding: 8px;
+    margin-top: 8px;
+}
+
+/* Input error state */
+.xyz-supplier-discount-field input[type="number"].error {
+    border-color: #d63638;
+    box-shadow: 0 0 0 1px #d63638;
+}
+
+/* Admin notice styling */
+.notice.xyz-supplier-discount-notice {
+    border-left-color: #d63638;
+}
+
+.notice.xyz-supplier-discount-notice p {
+    margin: 0.5em 0;
+    font-weight: 500;
+}
+
+/* Variation field styling */
+.variation-field .xyz-supplier-discount-field {
+    margin-top: 10px;
+    padding: 10px;
+    background: #f9f9f9;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Settings page styling */
+.xyz-supplier-settings .form-table th {
+    width: 200px;
+    padding: 20px 10px 20px 0;
+}
+
+.xyz-supplier-settings .form-table td {
+    padding: 15px 10px;
+}
+
+.xyz-supplier-settings .description {
+    font-style: italic;
+    color: #666;
+    margin-top: 5px;
+}
+
+.xyz-supplier-settings .button-primary {
+    margin-top: 10px;
+}
